@@ -1,0 +1,91 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
+
+// Структура для результата
+type Command struct {
+	key   string
+	value string
+}
+
+// Функция parse
+func parse(str string) (*Command, error) {
+	// 1. Разбиваем строку на части по пробелам
+	// strings.Fields игнорирует лишние пробелы
+	parts := strings.Fields(str)
+
+	if len(parts) == 0 {
+		return nil, errors.New("empty command")
+	}
+
+	// 2. Получаем саму команду (GET, SET, DELETE)
+	cmd := parts[0]
+
+	// Приводим команду к верхнему регистру, чтобы "get", "Get" и "GET" работали одинаково
+	cmd = strings.ToUpper(cmd)
+
+	switch cmd {
+	case "GET", "DELETE":
+		// Ожидаем ровно 2 части: Команда и Ключ
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("wrong number of arguments for %s", cmd)
+		}
+		
+		// Убираем кавычки из ключа
+		key := strings.Trim(parts[1], `"`)
+		if key == "" {
+			return nil, errors.New("empty key")
+		}
+
+		return &Command{key: key}, nil
+
+	case "SET":
+		// Ожидаем ровно 3 части: Команда, Ключ и Значение
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("wrong number of arguments for SET")
+		}
+
+		key := strings.Trim(parts[1], `"`)
+		val := strings.Trim(parts[2], `"`)
+
+		return &Command{key: key, value: val}, nil
+
+    	case "PING":
+		if len(parts) != 1 {
+			return nil, errors.New("PING takes no arguments")
+		}
+		// Можно вернуть специальную структуру или пустую
+		return &Command{key: "PONG", value: ""}, nil
+
+	default:
+		return nil, errors.New("unknown command")
+	}
+}
+
+func main() {
+	// Тесты
+	inputs := []string{
+		`GET "KEY"`,
+		`SET "KEY" "VALUE"`,
+		`GET "KEY"`,
+		`DELETE "KEY"`,
+		`INVALID "CMD"`,
+		`SHOT "fdsfds"`,
+		`FLY "UP"`,
+		`GET "KEY"`,
+		`PING`,
+		}
+
+	for _, in := range inputs {
+		res, err := parse(in)
+		if err != nil {
+			fmt.Printf("Input: %-20s | Error: %v\n", in, err)
+		} else {
+			fmt.Printf("Input: %-20s | Result: {key: %s, value: %s}\n", in, res.key, res.value)
+		}
+	}
+}
