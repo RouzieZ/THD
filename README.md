@@ -7,7 +7,18 @@
 ## Структура
 
 ```text
+cmd/
+  myapp/main.go         — исходная заготовка точки входа
+configs/
+  config.yaml          — заготовка конфигурации
+internal/
+  app/app.go
+  config/config.go
+  handlers/handlers.go
+  repository/repo.go
+  services/service.go
 pkg/
+  publiclib/publiclib.go — заготовка общего пакета
   storage/
     engine.go           — хранение данных и операции над ними
     engine_test.go      — проверки хранилища и журналирования
@@ -15,7 +26,15 @@ pkg/
   logger/
     logger.go           — настройка структурированных логов через log/slog
     logger_test.go      — проверки JSON-вывода и уровней логирования
+Dockerfile              — заготовка контейнера
+go.mod
+go.sum
+README.md
 ```
+
+Исходные заготовки проекта сохранены в `cmd`, `configs`, `internal` и
+`pkg/publiclib`. Хранилище и модуль журналирования реализованы в `pkg/storage`
+и `pkg/logger`; пример их использования приведён ниже.
 
 ## API
 
